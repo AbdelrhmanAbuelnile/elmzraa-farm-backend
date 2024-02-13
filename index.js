@@ -1,6 +1,7 @@
+require('dotenv').config();
 const express = require('express');
 const app = express();
-const port = 3000;
+const PORT = process.env.PORT || 3000;
 const path = require('path');
 const morgan = require('morgan')
 const mongoose = require('mongoose');
@@ -9,19 +10,35 @@ const cropsRouts = require('./routes/cropsRouter')
 const authRoutes = require('./routes/auth')
 const cors = require('cors')
 require('./db')
-
+const corsOptions = {
+  origin: 'http://localhost:5173/',
+  optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+}
 
 app.use(cors())
+// Middleware to check API key
+const apiKeyMiddleware = (req, res, next) => {
+  const apiKey = req.headers['api-key'];
+  console.log("🚀 ~ apiKeyMiddleware ~ apiKey:", apiKey)
+  if (!apiKey || apiKey !== process.env.API_KEY) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+
+  next();
+};
+
+app.use(apiKeyMiddleware);
+
 
 app.use(express.json());
 app.use(express.urlencoded())
 app.use(morgan('tiny'))
 
 
-app.use('/users', userRoutes);
-app.use('/crops', cropsRouts);
+app.use('/api/users', userRoutes);
+app.use('/api/crops', cropsRouts);
 
-app.use('/auth', authRoutes)
+app.use('/api/auth', authRoutes)
 
 app.get('/', (req, res) => {
   res.send(path.join(__dirname, 'index.html'));
@@ -38,6 +55,6 @@ app.use((err,req,res,next)=>{
 })
 
 
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
