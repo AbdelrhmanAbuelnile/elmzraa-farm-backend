@@ -1,4 +1,4 @@
-// require('dotenv').config();
+require('dotenv').config();
 const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -7,6 +7,7 @@ const morgan = require('morgan')
 const mongoose = require('mongoose');
 const userRoutes = require('./routes/usersRoutes')
 const cropsRouts = require('./routes/cropsRouter')
+const farmRouts = require('./routes/farmRouter')
 const authRoutes = require('./routes/auth')
 const cors = require('cors')
 require('./db')
@@ -33,6 +34,7 @@ app.use(morgan('tiny'))
 
 app.use('/api/users', userRoutes);
 app.use('/api/crops', cropsRouts);
+app.use('/api/farm', farmRouts);
 
 app.use('/api/auth', authRoutes)
 

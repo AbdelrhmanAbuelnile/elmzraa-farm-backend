@@ -9,6 +9,8 @@ const router = express.Router();
 router.post('/register', async (req, res) => {
   try {
     const { username, password, role } = req.body;
+    console.log("🚀 ~ router.post ~ username, password, role:", username, password, role)
+
     
     // Check if role is valid
     if (!['farmer', 'engineer', 'stakeholder'].includes(role)) {
@@ -51,7 +53,8 @@ router.post('/login', async (req, res) => {
     // Generate JWT token
     const token = jwt.sign({ username: user.username, role: user.role }, 'secretkey');
 
-    res.status(200).json({ token });
+    // Send token, role and username
+    res.status(200).json({ token, user: { role: user.role, username: user.username} }); 
   } catch (error) {
     console.error(error);
     res.status(500).send('Error logging in');
