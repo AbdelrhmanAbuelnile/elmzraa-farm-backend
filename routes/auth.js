@@ -8,7 +8,7 @@ const router = express.Router();
 
 router.post('/register', async (req, res) => {
   try {
-    const { username, password, role } = req.body;
+    const { username, password, role, email } = req.body;
     console.log("🚀 ~ router.post ~ username, password, role:", username, password, role)
 
     
@@ -17,13 +17,18 @@ router.post('/register', async (req, res) => {
       return res.status(400).send('Invalid role');
     }
 
+    const existingEmail = await User.findOne({ email });
+    if (existingEmail) {
+      return res.status(409).send('Email already in use');
+    }
+
     const existingUser = await User.findOne({ username });
     if (existingUser) {
       return res.status(409).send('User already exists');
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({ username, password: hashedPassword, role });
+    const user = new User({ username, password: hashedPassword, role, email });
     await user.save();
     
     res.status(201).send('User registered successfully');
