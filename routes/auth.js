@@ -59,7 +59,7 @@ router.post('/login', async (req, res) => {
     const token = jwt.sign({ username: user.username, role: user.role }, 'secretkey');
 
     // Send token, role and username
-    res.status(200).json({ token, user: { role: user.role, username: user.username} }); 
+    res.status(200).json({ token, user: { role: user.role, username: user.username, _id: user._id} }); 
   } catch (error) {
     console.error(error);
     res.status(500).send('Error logging in');
