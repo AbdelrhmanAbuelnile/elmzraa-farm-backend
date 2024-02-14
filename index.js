@@ -1,4 +1,4 @@
-require('dotenv').config();
+// require('dotenv').config();
 const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -10,10 +10,6 @@ const cropsRouts = require('./routes/cropsRouter')
 const authRoutes = require('./routes/auth')
 const cors = require('cors')
 require('./db')
-const corsOptions = {
-  origin: 'http://localhost:5173/',
-  optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
-}
 
 app.use(cors())
 // Middleware to check API key
