@@ -33,7 +33,7 @@ router.get('/user/:userId', async (req, res) => {
     const { userId } = req.params;
 
     // Find all farms associated with the user ID and populate the crops field
-    const farms = await farmModel.find({ workers: userId }).populate('crops').populate('workers');
+    const farms = await farmModel.find({ workers: userId }).populate('crops').populate({ path: 'workers', select: '-password' });
 
     // If no farms are found, return a 404 status code with an error message
     if (!farms) {
