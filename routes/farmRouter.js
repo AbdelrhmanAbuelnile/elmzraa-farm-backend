@@ -27,6 +27,28 @@ router.post('/', async (req,res)=> {
   res.status(201).json(savedFarm);
 })
 
+// get all farms for a specific user
+router.get('/user/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    // Find all farms associated with the user ID and populate the crops field
+    const farms = await farmModel.find({ workers: userId }).populate('crops').populate('workers');
+
+    // If no farms are found, return a 404 status code with an error message
+    if (!farms) {
+      return res.status(404).json({ error: 'No farms found for this user' });
+    }
+
+    // Send the farms data in the response
+    res.json(farms);
+  } catch (error) {
+    // If an error occurs, send a 500 status code with the error message
+    console.error(error); // Log the error for debugging
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 router.get('/:farmId/crops', async (req, res) => {
   try {
     const { farmId } = req.params;

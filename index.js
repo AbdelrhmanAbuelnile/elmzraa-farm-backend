@@ -9,6 +9,8 @@ const userRoutes = require('./routes/usersRoutes')
 const cropsRouts = require('./routes/cropsRouter')
 const farmRouts = require('./routes/farmRouter')
 const authRoutes = require('./routes/auth')
+const fertlizersRoutes = require('./routes/fertilizerRouter')
+const equipmentRoutes = require('./routes/equipmentRouter')
 const cors = require('cors')
 require('./db')
 
@@ -35,6 +37,8 @@ app.use(morgan('tiny'))
 app.use('/api/users', userRoutes);
 app.use('/api/crops', cropsRouts);
 app.use('/api/farm', farmRouts);
+app.use('/api/fertlizers', fertlizersRoutes);
+app.use('/api/equipments', equipmentRoutes);
 
 app.use('/api/auth', authRoutes)
 
