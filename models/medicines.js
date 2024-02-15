@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const medicinesSchema = new Schema({
+const medicineSchema = new Schema({
     name: { type: String, required: true },
     count: { type: Number, required: true },
     cost: { type: Number, required: true },
@@ -9,5 +9,6 @@ const medicinesSchema = new Schema({
     Farm_Id:{ type: mongoose.Schema.Types.ObjectId, ref: 'Farm' }
 })
 
-const Medicines = mongoose.model('Medicines', medicinesSchema);
-module.exports = Medicines
+const Medicine = mongoose.model('Medicine', medicineSchema);
+
+module.exports = Medicine;

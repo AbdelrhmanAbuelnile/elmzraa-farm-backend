@@ -11,6 +11,7 @@ const farmRouts = require('./routes/farmRouter')
 const authRoutes = require('./routes/auth')
 const fertlizersRoutes = require('./routes/fertilizerRouter')
 const equipmentRoutes = require('./routes/equipmentRouter')
+const medicinesRoutes = require('./routes/medicinesRoutes')
 const cors = require('cors')
 require('./db')
 
@@ -39,6 +40,7 @@ app.use('/api/crops', cropsRouts);
 app.use('/api/farm', farmRouts);
 app.use('/api/fertlizers', fertlizersRoutes);
 app.use('/api/equipments', equipmentRoutes);
+app.use('/api/medicines', medicinesRoutes);
 
 app.use('/api/auth', authRoutes)
 

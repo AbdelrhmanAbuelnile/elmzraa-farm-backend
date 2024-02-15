@@ -3,8 +3,7 @@ const router = express.Router();
 const Fertilizer = require('../models/fertlizers');
 const Farm = require('../models/farm');
 
-// POST route to create a new fertilizer
-// POST route to create a new fertilizer
+// create a new fertilizer
 router.post('/', async (req, res) => {
   try {
     const fertilizer = new Fertilizer(req.body);

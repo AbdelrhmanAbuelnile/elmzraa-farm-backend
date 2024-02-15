@@ -40,6 +40,26 @@ router.post('/', async (req,res)=> {
   res.status(201).json(savedFarm);
 })
 
+// get farm data by farm id
+router.get('/:farmId', async (req, res) => {
+  try {
+    const { farmId } = req.params;
+    const farm = await farmModel.findById(farmId)
+    .populate('crops')
+    .populate({ path: 'workers', select: '-password -email -Farm_Id' })
+    .populate({ path: 'equipments', select: '-Farm_Id'})
+    .populate({ path: 'fertilizers', select: '-Farm_Id'})
+    .populate({ path: 'medicines', select: '-Farm_Id'});
+    if (!farm) {
+      return res.status(404).json({ error: 'Farm not found' });
+    }
+    res.json(farm);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // get all farms for a specific user like engineer or stakeholder
 router.get('/user/:userId', async (req, res) => {
   try {
@@ -141,6 +161,8 @@ router.post('/:farmId/addWorkers', async (req, res) => {
       }else{
         return res.status(400).send(`Worker with ID ${workerId} already exists in the farm`);
       }
+      worker.Farm_Id = farmId;
+      await worker.save();
     }
 
     await farm.save();
@@ -184,6 +206,7 @@ router.patch('/:farmId', async (req, res) => {
       // Add the worker to the farm's workers field
       if(!farm.workers.includes(workerId)){
         farm.workers.push(workerId);
+        worker.farms.push(farmId);
       }else{
         return res.status(400).send(`Worker with ID ${workerId} already exists in the farm`);
       }
