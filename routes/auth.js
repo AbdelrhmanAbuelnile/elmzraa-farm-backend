@@ -28,7 +28,14 @@ router.post('/register', async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({ username, password: hashedPassword, role, email });
+    let user; 
+
+    // Check if role is engineer or stakeholder
+    if (role === 'engineer' || role === 'stakeholder') {
+      user = new User({ username, password: hashedPassword, role, email, Farm_Id: [] });
+    } else {
+      user = new User({ username, password: hashedPassword, role, email, Farm_Id: null});
+    }
     await user.save();
     
     res.status(201).send('User registered successfully');
@@ -59,7 +66,7 @@ router.post('/login', async (req, res) => {
     const token = jwt.sign({ username: user.username, role: user.role }, 'secretkey');
 
     // Send token, role and username
-    res.status(200).json({ token, user: { role: user.role, username: user.username, _id: user._id} }); 
+    res.status(200).json({ token, user: { role: user.role, username: user.username, _id: user._id, farmId: user.Farm_Id} }); 
   } catch (error) {
     console.error(error);
     res.status(500).send('Error logging in');
