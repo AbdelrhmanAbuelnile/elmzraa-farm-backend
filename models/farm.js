@@ -10,6 +10,10 @@ const farmSchema = new Schema({
     size: { type: Number, required: true },
     planted_percentage: { type: Number, required: true },
     harvest_percentage: { type: Number, required: true },
+    stackholders: [{
+        type: Schema.Types.ObjectId,
+        ref: 'User'
+    }],
     crops: [{
         type: Schema.Types.ObjectId,
         ref: 'Crop'
@@ -19,17 +23,17 @@ const farmSchema = new Schema({
         ref: 'User'
     }],
     equipments: [{
-        name: { type: String, required: true },
-        count: { type: Number, required: true }
+        type: Schema.Types.ObjectId,
+        ref: 'Equipment'
     }],
     fertilizers: [{
-        name: { type: String, required: true },
-        count: { type: Number, required: true }
+        type: Schema.Types.ObjectId,
+        ref: 'Fertilizer'
     }],
     medicines: [{
-        name: { type: String, required: true },
-        count: { type: Number, required: true }
-    }]
+        type: Schema.Types.ObjectId,
+        ref: 'Medicine'
+    }],
 });
 
 const Farm = mongoose.model('Farm', farmSchema);
