@@ -5,7 +5,7 @@ const User = require("../models/User")
 const router = express.Router();
 
 // create a farm by a stakeholder only
-router.post('/', async (req,res)=> {
+router.post('/', async (req, res) => {
   const { name, size, planted_percentage, harvest_percentage, crops, workers, equipments, fertilizers, medicines, userId } = req.body;
 
   const user = await User.findById(userId);
@@ -18,16 +18,16 @@ router.post('/', async (req,res)=> {
   }
 
   const newFarm = new farmModel({
-      name,
-      size,
-      planted_percentage,
-      harvest_percentage,
-      stackholders: [userId],
-      crops,
-      workers,
-      equipments,
-      fertilizers,
-      medicines
+    name,
+    size,
+    planted_percentage,
+    harvest_percentage,
+    stackholders: [userId],
+    crops,
+    workers,
+    equipments,
+    fertilizers,
+    medicines
   });
 
   const savedFarm = await newFarm.save();
@@ -40,12 +40,12 @@ router.get('/:farmId', async (req, res) => {
   try {
     const { farmId } = req.params;
     const farm = await farmModel.findById(farmId)
-    .populate('crops')
-    .populate({ path: 'stackholders', select: '-password -Farm_Id' })
-    .populate({ path: 'workers', select: '-password -Farm_Id' })
-    .populate({ path: 'equipments', select: '-Farm_Id'})
-    .populate({ path: 'fertilizers', select: '-Farm_Id'})
-    .populate({ path: 'medicines', select: '-Farm_Id'});
+      .populate('crops')
+      .populate({ path: 'stackholders', select: '-password -Farm_Id' })
+      .populate({ path: 'workers', select: '-password -Farm_Id' })
+      .populate({ path: 'equipments', select: '-Farm_Id' })
+      .populate({ path: 'fertilizers', select: '-Farm_Id' })
+      .populate({ path: 'medicines', select: '-Farm_Id' });
     if (!farm) {
       return res.status(404).json({ error: 'Farm not found' });
     }
@@ -66,11 +66,11 @@ router.get('/user/:userId', async (req, res) => {
       return res.status(404).send('User not found');
     }
 
-    const farms = await farmModel.find({ 
+    const farms = await farmModel.find({
       $or: [
         { workers: userId },
         { stackholders: userId }
-      ] 
+      ]
     }).populate('crops').populate({ path: 'workers', select: '-password' });
 
     if (!farms) {
@@ -103,13 +103,13 @@ router.get('/:farmId/crops', async (req, res) => {
 
 
 // get all farms only accessd by the creaitor of the application
-router.get('/', async (req,res)=> {
+router.get('/', async (req, res) => {
   const farms = await farmModel.find();
   res.send(farms)
 })
 
 // get a farm by name only accessd by the creaitor of the application
-router.get('/:farm', async (req,res)=> {
+router.get('/:farm', async (req, res) => {
   let farmName = req.params.farm;
   farmName = farmName.toLowerCase();
   const farm = await farmModel.find({
@@ -132,16 +132,16 @@ router.post('/:farmId/addWorkers', async (req, res) => {
     if (!farm) {
       return res.status(404).send('Farm not found');
     }
-    
+
     for (const workerId of workerIds) {
       // Find the worker by ID
       const worker = await User.findById(workerId);
       if (!worker) {
         return res.status(404).send(`Worker with ID ${workerId} not found`);
       }
-      if(!farm.workers.includes(workerId)){
+      if (!farm.workers.includes(workerId)) {
         farm.workers.push(workerId);
-      }else{
+      } else {
         return res.status(400).send(`Worker with ID ${workerId} already exists in the farm`);
       }
       worker.Farm_Id = farmId;
@@ -149,10 +149,44 @@ router.post('/:farmId/addWorkers', async (req, res) => {
     }
     await farm.save();
 
-    res.send({message: "Workers added successfully to the farm"});
+    res.send({ message: "Workers added successfully to the farm" });
   } catch (error) {
     console.error(error);
     res.status(500).send('Error adding workers to farm');
+  }
+});
+
+router.delete('/:farmId/removeWorker', async (req, res) => {
+  const { farmId } = req.params;
+  const { workerId } = req.body;
+
+  try {
+    // Find the worker by ID and remove the farmId
+    const worker = await User.findByIdAndUpdate(
+      workerId,
+      { $unset: { Farm_Id: "" } },
+      { new: true }
+    );
+
+    if (!worker) {
+      return res.status(404).send('Worker not found');
+    }
+
+    // Find the farm by ID and remove the worker
+    const farm = await farmModel.findByIdAndUpdate(
+      farmId,
+      { $pull: { workers: workerId } },
+      { new: true }
+    );
+
+    if (!farm) {
+      return res.status(404).send('Farm not found');
+    }
+
+    res.send({ message: "Worker removed successfully from the farm" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error removing worker from farm');
   }
 });
 
@@ -166,7 +200,7 @@ router.patch('/:farmId', async (req, res) => {
     return res.status(404).send('User not found');
   }
 
-  if(user.role === 'farmer'){
+  if (user.role === 'farmer') {
     return res.status(403).send('User does not have permission to update the farm');
   }
 
@@ -181,10 +215,10 @@ router.patch('/:farmId', async (req, res) => {
       if (!worker) {
         return res.status(404).send(`Worker with ID ${workerId} not found`);
       }
-      if(!farm.workers.includes(workerId)){
+      if (!farm.workers.includes(workerId)) {
         farm.workers.push(workerId);
         worker.farms.push(farmId);
-      }else{
+      } else {
         return res.status(400).send(`Worker with ID ${workerId} already exists in the farm`);
       }
     }
