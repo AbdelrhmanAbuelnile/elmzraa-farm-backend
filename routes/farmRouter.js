@@ -41,7 +41,8 @@ router.get('/:farmId', async (req, res) => {
     const { farmId } = req.params;
     const farm = await farmModel.findById(farmId)
     .populate('crops')
-    .populate({ path: 'workers', select: '-password -email -Farm_Id' })
+    .populate({ path: 'stackholders', select: '-password -Farm_Id' })
+    .populate({ path: 'workers', select: '-password -Farm_Id' })
     .populate({ path: 'equipments', select: '-Farm_Id'})
     .populate({ path: 'fertilizers', select: '-Farm_Id'})
     .populate({ path: 'medicines', select: '-Farm_Id'});
