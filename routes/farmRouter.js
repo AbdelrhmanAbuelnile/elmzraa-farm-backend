@@ -65,16 +65,12 @@ router.get('/user/:userId', async (req, res) => {
       return res.status(404).send('User not found');
     }
 
-    const farms = await farmModel
-    .find({ 
+    const farms = await farmModel.find({ 
       $or: [
         { workers: userId },
-        { stakeholders: userId }
+        { stackholders: userId }
       ] 
-    })
-    .populate('crops')
-    .populate({ path: 'workers', select: '-password -email -Farm_Id' })
-    .populate({ path: 'stakeholders', select: '-password -email -Farm_Id' });
+    }).populate('crops').populate({ path: 'workers', select: '-password' });
 
     if (!farms) {
       return res.status(404).json({ error: 'No farms found for this user' });
