@@ -8,18 +8,15 @@ const router = express.Router();
 router.post('/', async (req,res)=> {
   const { name, size, planted_percentage, harvest_percentage, crops, workers, equipments, fertilizers, medicines, userId } = req.body;
 
-  // Find the user by ID
   const user = await User.findById(userId);
   if (!user) {
     return res.status(404).send('User not found');
   }
 
-  // Check the user's role
   if (user.role === 'farmer' || user.role === 'engineer') {
     return res.status(403).send('User does not have permission to create a farm');
   }
 
-  // Create a new farm document
   const newFarm = new farmModel({
       name,
       size,
@@ -33,10 +30,8 @@ router.post('/', async (req,res)=> {
       medicines
   });
 
-  // Save the farm to the database
   const savedFarm = await newFarm.save();
 
-  // Send a success response with the saved farm data
   res.status(201).json(savedFarm);
 })
 
@@ -65,30 +60,29 @@ router.get('/user/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
 
-    // Find the user by ID
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).send('User not found');
     }
 
-    // Check the user's role
-    if (user.role === 'farmer') {
-      return res.status(403).send('User does not have permission to access this route');
-    }
+    const farms = await farmModel
+    .find({ 
+      $or: [
+        { workers: userId },
+        { stakeholders: userId }
+      ] 
+    })
+    .populate('crops')
+    .populate({ path: 'workers', select: '-password -email -Farm_Id' })
+    .populate({ path: 'stakeholders', select: '-password -email -Farm_Id' });
 
-    // Find all farms associated with the user ID and populate the crops field
-    const farms = await farmModel.find({ workers: userId }).populate('crops').populate({ path: 'workers', select: '-password' });
-
-    // If no farms are found, return a 404 status code with an error message
     if (!farms) {
       return res.status(404).json({ error: 'No farms found for this user' });
     }
 
-    // Send the farms data in the response
     res.json(farms);
   } catch (error) {
-    // If an error occurs, send a 500 status code with the error message
-    console.error(error); // Log the error for debugging
+    console.error(error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -97,18 +91,15 @@ router.get('/:farmId/crops', async (req, res) => {
   try {
     const { farmId } = req.params;
 
-    // Find the farm by ID and populate the crops
     const farm = await farmModel.findById(farmId).populate('crops');
 
     if (!farm) {
       return res.status(404).json({ error: 'Farm not found' });
     }
 
-    // Send the crops data in the response
     res.json(farm.crops);
   } catch (error) {
-    // If an error occurs, send a 500 status code with the error message
-    console.error(error); // Log the error for debugging
+    console.error(error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -139,23 +130,18 @@ router.post('/:farmId/addWorkers', async (req, res) => {
   const { workerIds } = req.body;
   console.log("🚀 ~ router.patch ~ workerIds:", workerIds)
 
-
   try {
-    // Find the farm by ID
     const farm = await farmModel.findById(farmId);
     if (!farm) {
       return res.status(404).send('Farm not found');
     }
-
-    // Iterate over the workerIds array
+    
     for (const workerId of workerIds) {
       // Find the worker by ID
       const worker = await User.findById(workerId);
       if (!worker) {
         return res.status(404).send(`Worker with ID ${workerId} not found`);
       }
-
-      // Add the worker to the farm's workers field
       if(!farm.workers.includes(workerId)){
         farm.workers.push(workerId);
       }else{
@@ -164,10 +150,8 @@ router.post('/:farmId/addWorkers', async (req, res) => {
       worker.Farm_Id = farmId;
       await worker.save();
     }
-
     await farm.save();
 
-    // Send a success response
     res.send({message: "Workers added successfully to the farm"});
   } catch (error) {
     console.error(error);
@@ -190,20 +174,16 @@ router.patch('/:farmId', async (req, res) => {
   }
 
   try {
-    // Find the farm by ID
     const farm = await farmModel.findById(farmId);
     if (!farm) {
       return res.status(404).send('Farm not found');
     }
 
     for (const workerId of workerIds) {
-      // Find the worker by ID
       const worker = await User.findById(workerId);
       if (!worker) {
         return res.status(404).send(`Worker with ID ${workerId} not found`);
       }
-
-      // Add the worker to the farm's workers field
       if(!farm.workers.includes(workerId)){
         farm.workers.push(workerId);
         worker.farms.push(farmId);
@@ -212,15 +192,12 @@ router.patch('/:farmId', async (req, res) => {
       }
     }
 
-    // Update the farm data
     farm.name = name;
     farm.size = size;
     farm.crops = crops;
 
-    // Save the updated farm data
     await farm.save();
 
-    // Send a success response with the updated farm data
     res.json(farm);
   } catch (error) {
     console.error(error);
