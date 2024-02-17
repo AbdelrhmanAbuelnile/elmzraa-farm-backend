@@ -156,9 +156,8 @@ router.post('/:farmId/addWorkers', async (req, res) => {
   }
 });
 
-router.delete('/:farmId/removeWorker', async (req, res) => {
-  const { farmId } = req.params;
-  const { workerId } = req.body;
+router.delete('/:farmId/removeWorker/:workerId', async (req, res) => {
+  const { farmId, workerId } = req.params;
 
   try {
     // Find the worker by ID and remove the farmId
