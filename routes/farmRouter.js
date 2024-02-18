@@ -74,7 +74,6 @@ router.get('/user/:userId', async (req, res) => {
         { stackholders: userId }
       ]
     })
-    .select('location')
     .populate('crops')
     .populate({ path: 'workers', select: '-password' });
 
