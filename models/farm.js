@@ -34,6 +34,10 @@ const farmSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'Medicine'
     }],
+    location: {
+        latitude: { type: Number, required: true },
+        longitude: { type: Number, required: true }
+    }
 });
 
 const Farm = mongoose.model('Farm', farmSchema);

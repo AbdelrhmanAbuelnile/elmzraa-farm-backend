@@ -6,7 +6,7 @@ const router = express.Router();
 
 // create a farm by a stakeholder only
 router.post('/', async (req, res) => {
-  const { name, size, planted_percentage, harvest_percentage, crops, workers, equipments, fertilizers, medicines, userId } = req.body;
+  const { name, size, planted_percentage, harvest_percentage, crops, workers, equipments, fertilizers, medicines, userId, location } = req.body;
 
   const user = await User.findById(userId);
   if (!user) {
@@ -27,19 +27,21 @@ router.post('/', async (req, res) => {
     workers,
     equipments,
     fertilizers,
-    medicines
+    medicines,
+    location
   });
 
   const savedFarm = await newFarm.save();
 
   res.status(201).json(savedFarm);
-})
+});
 
 // get farm data by farm id
 router.get('/:farmId', async (req, res) => {
   try {
     const { farmId } = req.params;
     const farm = await farmModel.findById(farmId)
+      .select('location')
       .populate('crops')
       .populate({ path: 'stackholders', select: '-password -Farm_Id' })
       .populate({ path: 'workers', select: '-password -Farm_Id' })
@@ -71,7 +73,10 @@ router.get('/user/:userId', async (req, res) => {
         { workers: userId },
         { stackholders: userId }
       ]
-    }).populate('crops').populate({ path: 'workers', select: '-password' });
+    })
+    .select('location')
+    .populate('crops')
+    .populate({ path: 'workers', select: '-password' });
 
     if (!farms) {
       return res.status(404).json({ error: 'No farms found for this user' });
@@ -153,6 +158,41 @@ router.post('/:farmId/addWorkers', async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).send('Error adding workers to farm');
+  }
+});
+
+// add a stakeholder to the farm by farm id and stakeholder id only accessd by the stakeholders
+router.post('/:farmId/addStakeholders', async (req, res) => {
+  const { farmId } = req.params;
+
+  const { stakeholderIds } = req.body;
+
+  try {
+    const farm = await farmModel.findById(farmId);
+    if (!farm) {
+      return res.status(404).send('Farm not found');
+    }
+
+    for (const stakeholderId of stakeholderIds) {
+      // Find the stakeholder by ID
+      const stakeholder = await User.findById(stakeholderId);
+      if (!stakeholder) {
+        return res.status(404).send(`Stakeholder with ID ${stakeholderId} not found`);
+      }
+      if (!farm.stackholders.includes(stakeholderId)) {
+        farm.stackholders.push(stakeholderId);
+      } else {
+        return res.status(400).send(`Stakeholder with ID ${stakeholderId} already exists in the farm`);
+      }
+      stakeholder.Farm_Id = farmId;
+      await stakeholder.save();
+    }
+    await farm.save();
+
+    res.send({ message: "Stakeholders added successfully to the farm" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error adding stakeholders to farm');
   }
 });
 
