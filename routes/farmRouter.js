@@ -41,7 +41,7 @@ router.get('/:farmId', async (req, res) => {
   try {
     const { farmId } = req.params;
     const farm = await farmModel.findById(farmId)
-      .select('location')
+      // .select('location')
       .populate('crops')
       .populate({ path: 'stackholders', select: '-password -Farm_Id' })
       .populate({ path: 'workers', select: '-password -Farm_Id' })
