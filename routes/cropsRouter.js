@@ -98,5 +98,17 @@ router.get('/:crop', async (req,res)=> {
   res.send(crops);
 });
 
+// delete a crop
+router.delete('/:id', async (req, res) => {
+  const crop = await Crop.findById(req.params.id);
+  if (!crop) {
+    return res.status(404).send('Crop not found');
+  }
+
+  await crop.remove();
+
+  res.send({ message: 'Crop deleted successfully' });
+});
+
 
 module.exports = router;
