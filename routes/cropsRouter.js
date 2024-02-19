@@ -25,6 +25,35 @@ router.post('/', async (req,res)=> {
   res.send(crop);
 });
 
+// edit a crop
+router.patch('/:id', async (req, res) => {
+  const { name, plantDate, harvestDate, count, farmId } = req.body;
+
+  if (!farmId) {
+    return res.status(400).send('Farm ID is required');
+  }
+
+  const farm = await Farm.findById(farmId);
+  if (!farm) {
+    return res.status(404).send('Farm not found');
+  }
+
+  let crop = await Crop.findById(req.params.id);
+  if (!crop) {
+    return res.status(404).send('Crop not found');
+  }
+
+  crop.name = name;
+  crop.plantDate = plantDate;
+  crop.harvestDate = harvestDate;
+  crop.count = count;
+  crop.farm = farm._id;
+
+  await crop.save();
+
+  res.send(crop);
+});
+
 // get all crops
 router.get('/', async (req,res)=> {
   const {farmId} = req.body;
