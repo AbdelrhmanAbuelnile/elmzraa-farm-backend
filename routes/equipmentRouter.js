@@ -14,7 +14,7 @@ router.post('/', async (req, res) => {
     if (!farm) {
       return res.status(404).json({ error: 'Farm not found' });
     }
-    farm.equipments.push({ name: equipment.Eq_Type, count: equipment.Eq_count });
+    farm.equipments.push(equipment._id); // push equipment id
     await farm.save();
 
     res.status(201).json(equipment);
