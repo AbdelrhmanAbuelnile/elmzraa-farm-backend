@@ -8,6 +8,7 @@ const cropSchema = new Schema({
     count: { type: Number, required: true },
     farm: { type: Schema.Types.ObjectId, ref: 'Farm' }
 });
+// Creating a model for the crop collection based on the defined schema
 
 const Crop = mongoose.model('Crop', cropSchema);
 
